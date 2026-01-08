@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL & ~E_WARNING);
 
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;

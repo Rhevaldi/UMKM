@@ -4,10 +4,19 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\OrderController;
+
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -22,5 +31,12 @@ Route::middleware('auth')->group(function () {
     route::resource('categories', CategoryController::class);
     route::resource('products', ProductController::class);
 });
+
+
+
+Route::resource('orders', OrderController::class);
+Route::get('orders/{order}/payment/create',[PaymentController::class,'create'])->name('payments.create');
+Route::post('orders/{order}/payment',[PaymentController::class,'store'])->name('payments.store');
+
 
 require __DIR__.'/auth.php';
