@@ -11,16 +11,16 @@ use App\Http\Controllers\OrderController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-
+// Order Routes
 Route::resource('orders', OrderController::class);
 Route::get('orders/{order}/payment/create',[PaymentController::class,'create'])->name('payments.create');
 Route::post('orders/{order}/payment',[PaymentController::class,'store'])->name('payments.store');
