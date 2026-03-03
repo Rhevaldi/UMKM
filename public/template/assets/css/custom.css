@@ -1,0 +1,125 @@
+/* =========================
+   HERO SECTION
+========================= */
+
+.hero-section {
+    position: relative;
+    min-height: 95vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: url('/template/assets/images/slider-1.jpg') center center / cover no-repeat;
+    overflow: hidden;
+}
+
+/* Overlay */
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55); /* lebih terang */
+    backdrop-filter: blur(2px);
+}
+
+/* Content */
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 20px;
+    max-width: 700px;
+}
+
+/* Title */
+.hero-content h1 {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+/* Subtitle */
+.hero-content p {
+    font-size: clamp(16px, 2vw, 20px);
+    color: #f0f0f0;
+    margin-bottom: 25px;
+}
+
+/* Button */
+.hero-content .btn {
+    padding: 12px 40px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: 0.3s ease;
+}
+
+.hero-content .btn:hover {
+    transform: translateY(-3px);
+}
+
+/* =========================
+   MOBILE OPTIMIZATION
+========================= */
+
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 60vh;
+        padding: 40px 20px;
+    }
+
+    .hero-content h1 {
+        font-size: 28px;
+    }
+
+    .hero-content p {
+        font-size: 15px;
+    }
+}
+
+/* =========================
+   ORDER PAGE
+========================= */
+
+.order-section {
+    padding: 80px 0;
+    background: linear-gradient(to bottom, #739b59, #eef2f7);
+    min-height: 100vh;
+}
+
+/* Product item */
+.product-item {
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: 0.2s ease;
+}
+
+.product-item:hover {
+    background: #f5f7fa;
+}
+
+/* Order Box */
+.order-box {
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+/* Total */
+.total-box {
+    background: #f1f5f9;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+/* Button */
+.order-box .btn {
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .order-section {
+        padding: 50px 20px;
+    }
+}
