@@ -8,198 +8,150 @@ use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\OrderItem;
+use App\Models\Payment;
+use App\Models\PaymentSetting;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+
 
 class OrderController extends Controller
 {
-    /* ===============================
-       ADMIN ORDER
-    =============================== */
 
-    public function index()
-    {
-        $orders = Order::with('customer','items.product')->latest()->get();
-        return view('orders.index', compact('orders'));
-    }
+/* ===============================
+   ADMIN
+================================ */
 
-    public function create()
-    {
-        $customers = Customer::all();
-        $products = Product::where('is_active',1)->get();
-        return view('orders.create', compact('customers','products'));
-    }
+public function index()
+{
+    $orders = Order::with('customer','items.product')->latest()->get();
+    return view('orders.index', compact('orders'));
+}
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'products' => 'required|array',
-            'quantities' => 'required|array'
-        ]);
+public function show(Order $order)
+{
+    $order->load('customer','items.product','payment');
+    return view('orders.show', compact('order'));
+}
 
-        DB::transaction(function () use ($request) {
+public function destroy(Order $order)
+{
+    $order->delete();
 
-            $order = Order::create([
-                'customer_id' => $request->customer_id,
-                'order_code' => 'ORD'.time(),
-                'total_amount' => 0,
-                'status' => 'pending',
-                'order_date' => now()
-            ]);
-
-            $total = 0;
-
-            foreach ($request->products as $index => $product_id) {
-
-                $product = Product::findOrFail($product_id);
-                $qty = $request->quantities[$index];
-
-                if ($product->stock < $qty) {
-                    throw new \Exception("Stok {$product->name} tidak cukup.");
-                }
-
-                $subtotal = $product->price * $qty;
-
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'quantity' => $qty,
-                    'price' => $product->price,
-                    'subtotal' => $subtotal
-                ]);
-
-                $total += $subtotal;
-            }
-
-            $order->update(['total_amount' => $total]);
-        });
-
-        return redirect()->route('orders.index')
-            ->with('success','Order berhasil dibuat');
-    }
-
-    public function show(Order $order)
-    {
-        $order->load('customer','items.product','payment');
-        return view('orders.show', compact('order'));
-    }
-
-    public function destroy(Order $order)
-    {
-        $order->delete();
-        return redirect()->route('orders.index')
-            ->with('success','Order dihapus');
-    }
+    return redirect()->route('orders.index')
+        ->with('success','Order dihapus');
+}
 
 
-    /* ===============================
-       WHATSAPP ADMIN
-    =============================== */
+/* ===============================
+   CUSTOMER ORDER
+================================ */
 
-    public function whatsapp(Order $order)
-    {
-        $order->load('customer','items.product');
+public function storePublic(Request $request)
+{
+    $request->validate([
+        'name' => 'required',
+        'phone' => 'required',
+        'products' => 'required|array',
+        'quantities' => 'required|array'
+    ]);
 
-        $phone = preg_replace('/[^0-9]/','',$order->customer->phone);
+    return DB::transaction(function () use ($request){
 
-        if (substr($phone,0,1) == '0') {
+        $phone = preg_replace('/[^0-9]/','',$request->phone);
+
+        if(substr($phone,0,1) == '0'){
             $phone = '62'.substr($phone,1);
         }
 
-        $message = "Halo {$order->customer->name}\n\n";
-        $message .= "Detail pesanan Anda:\n\n";
+        $customer = Customer::firstOrCreate(
+            ['phone'=>$phone],
+            [
+                'name'=>$request->name,
+                'address'=>'-'
+            ]
+        );
 
-        foreach ($order->items as $item) {
-            $message .= "- {$item->product->name} x{$item->quantity} = Rp "
-                        .number_format($item->subtotal,0,',','.')."\n";
-        }
-
-        $message .= "\nTotal: Rp ".number_format($order->total_amount,0,',','.');
-        $message .= "\nSilakan lakukan pembayaran.";
-
-        return redirect("https://wa.me/{$phone}?text=".urlencode($message));
-    }
-
-
-    /* ===============================
-       FRONTEND ORDER (TANPA LOGIN)
-    =============================== */
-
-    public function storePublic(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'phone' => 'required',
-            'products' => 'required|array',
-            'quantities' => 'required|array'
+        $order = Order::create([
+            'customer_id'=>$customer->id,
+            'order_code'=>'ORD'.time(),
+            'total_amount'=>0,
+            'status'=>'pending',
+            'order_date'=>now()
         ]);
 
-        return DB::transaction(function () use ($request) {
+        $total = 0;
 
-            // Format nomor WA
-            $phone = preg_replace('/[^0-9]/','',$request->phone);
+        foreach ($request->products as $index=>$product_id){
 
-            if (substr($phone,0,1) == '0') {
-                $phone = '62'.substr($phone,1);
+            $product = Product::findOrFail($product_id);
+            $qty = $request->quantities[$index];
+
+            if($product->stock < $qty){
+                throw new \Exception("Stok {$product->name} tidak cukup");
             }
 
-            // Simpan / ambil customer
-            $customer = Customer::firstOrCreate(
-                ['phone' => $phone],
-                [
-                    'name' => $request->name,
-                    'address' => '-'
-                ]
-            );
+            $subtotal = $product->price * $qty;
 
-            // Buat order
-            $order = Order::create([
-                'customer_id' => $customer->id,
-                'order_code' => 'ORD'.time(),
-                'total_amount' => 0,
-                'status' => 'pending',
-                'order_date' => now()
+            OrderItem::create([
+                'order_id'=>$order->id,
+                'product_id'=>$product->id,
+                'quantity'=>$qty,
+                'price'=>$product->price,
+                'subtotal'=>$subtotal
             ]);
 
-            $total = 0;
+            $total += $subtotal;
+        }
 
-            foreach ($request->products as $index => $product_id) {
+        $order->update(['total_amount'=>$total]);
 
-                $product = Product::findOrFail($product_id);
-                $qty = $request->quantities[$index];
+        return redirect()->route('order.payment',$order->id);
 
-                if ($product->stock < $qty) {
-                    throw new \Exception("Stok {$product->name} tidak cukup.");
-                }
+    });
+}
 
-                $subtotal = $product->price * $qty;
 
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'quantity' => $qty,
-                    'price' => $product->price,
-                    'subtotal' => $subtotal
-                ]);
+/* ===============================
+   PAYMENT PAGE
+================================ */
 
-                $total += $subtotal;
-            }
+public function paymentPage(Order $order)
+{
+    $order->load('customer','items.product');
 
-            $order->update(['total_amount' => $total]);
+    $setting = PaymentSetting::first();
 
-            $order->load('items.product');
+    return view('frontend.pages.payment',compact('order','setting'));
+}
 
-            // Buat pesan WA
-            $message = "Halo {$customer->name}, berikut pesanan Anda:\n\n";
 
-            foreach ($order->items as $item) {
-                $message .= "- {$item->product->name} x{$item->quantity} = Rp "
-                            .number_format($item->subtotal,0,',','.')."\n";
-            }
+/* ===============================
+   WHATSAPP CUSTOMER
+================================ */
 
-            $message .= "\nTotal: Rp ".number_format($order->total_amount,0,',','.');
-            $message .= "\nSilakan lakukan pembayaran via QRIS.";
+public function whatsapp(Order $order)
+{
+    $message = "Halo admin saya sudah melakukan pembayaran.\n";
+    $message .= "Order : {$order->order_code}\n";
+    $message .= "Total : Rp ".number_format($order->total_amount,0,',','.');
 
-            return redirect("https://wa.me/{$phone}?text=".urlencode($message));
-        });
-    }
+    return redirect(
+        "https://wa.me/6285346016066?text=".urlencode($message)
+    );
+}
+
+
+/* ===============================
+   INVOICE
+================================ */
+
+public function invoice(Order $order)
+{
+    $order->load('customer','items.product');
+
+    $pdf = Pdf::loadView('orders.invoice',compact('order'));
+
+    return $pdf->download('invoice-'.$order->order_code.'.pdf');
+}
+
 }

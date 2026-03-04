@@ -2,75 +2,138 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\CategoryController;
+/*
+|--------------------------------------------------------------------------
+| CONTROLLERS
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\PaymentSettingController;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\OrdersExport;
 
 /*
 |--------------------------------------------------------------------------
-| FRONTEND WEBSITE (TEMPLATE)
+| FRONTEND (CUSTOMER)
 |--------------------------------------------------------------------------
-| Halaman publik untuk pengunjung
 */
-Route::get('/', function () {
-    return view('frontend.pages.home');
-})->name('home');
 
-Route::get('/order', [FrontendController::class, 'orderPage'])
-    ->name('order.page');
-    
 Route::get('/', [FrontendController::class,'home'])->name('home');
 
-Route::post('/order-public', [OrderController::class, 'storePublic'])
+Route::get('/order', [FrontendController::class,'orderPage'])
+    ->name('order.page');
+
+Route::post('/order', [OrderController::class,'storePublic'])
     ->name('order.public');
 
-Route::post('/order-public', [OrderController::class, 'storePublic'])
-    ->name('order.public');
+Route::get('/payment/{order}', [OrderController::class,'paymentPage'])
+    ->name('order.payment');
+
+Route::get('/payment/{order}/whatsapp', [OrderController::class,'whatsapp'])
+    ->name('order.whatsapp');
 
 
 /*
 |--------------------------------------------------------------------------
-| AUTH ROUTES (LOGIN, REGISTER, DLL)
+| AUTH
 |--------------------------------------------------------------------------
-| Sudah disediakan oleh Laravel Breeze/Fortify
 */
+
 require __DIR__.'/auth.php';
 
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN PANEL (HARUS LOGIN)
+| ADMIN PANEL
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])
+Route::middleware(['auth','verified'])->group(function () {
+
+    Route::get('/dashboard',[DashboardController::class,'index'])
         ->name('dashboard');
 
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    /*
+    | PROFILE
+    */
 
-    // Master Data
-    Route::resource('categories', CategoryController::class);
-    Route::resource('products', ProductController::class);
+    Route::get('/profile',[ProfileController::class,'edit'])
+        ->name('profile.edit');
 
-    // Orders
-    Route::resource('orders', OrderController::class);
-    Route::get('orders/{order}/whatsapp',
+    Route::patch('/profile',[ProfileController::class,'update'])
+        ->name('profile.update');
+
+    Route::delete('/profile',[ProfileController::class,'destroy'])
+        ->name('profile.destroy');
+
+
+    /*
+    | MASTER DATA
+    */
+
+    Route::resource('categories',CategoryController::class);
+    Route::resource('products',ProductController::class);
+
+
+    /*
+    | ORDERS
+    */
+
+ Route::resource('orders', OrderController::class);
+
+Route::get(
+    'orders/{order}/whatsapp',
     [OrderController::class,'whatsapp']
 )->name('orders.whatsapp');
 
-    // Payments
-    Route::get('orders/{order}/payment/create', [PaymentController::class, 'create'])
-        ->name('payments.create');
+Route::get(
+    'orders/{order}/invoice',
+    [OrderController::class,'invoice']
+)->name('orders.invoice');
+    
 
-    Route::post('orders/{order}/payment', [PaymentController::class, 'store'])
-        ->name('payments.store');
+    /*
+    | PAYMENT
+    */
+
+    Route::get(
+        'orders/{order}/payment/create',
+        [PaymentController::class,'create']
+    )->name('payments.create');
+
+    Route::post(
+        'orders/{order}/payment',
+        [PaymentController::class,'store']
+    )->name('payments.store');
+
+    Route::get('/payment-settings',[PaymentSettingController::class,'edit'])
+    ->name('payment.settings');
+
+Route::post('/payment-settings',[PaymentSettingController::class,'update'])
+    ->name('payment.settings.update');
+
+    /*
+    | REPORTS
+    */
+
+    Route::get('/reports',[ReportController::class,'index'])
+        ->name('reports.index');
+
+    Route::get('/reports/export',function(){
+
+        return Excel::download(
+            new OrdersExport,
+            'laporan-penjualan.xlsx'
+        );
+
+    })->name('reports.export');
+
 });
