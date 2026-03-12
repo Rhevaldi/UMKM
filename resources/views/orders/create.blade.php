@@ -6,9 +6,10 @@
 
     <div class="container-fluid">
 
-        <div class="content-header mb-3">
-            <h3 class="m-0">Buat Order Baru</h3>
-        </div>
+        <h3 class="mb-3">
+            <i class="fas fa-plus-circle mr-2"></i>
+            Buat Order Baru
+        </h3>
 
         <div class="card shadow-sm">
 
@@ -18,111 +19,82 @@
 
                     @csrf
 
-                    <div class="row">
+                    <div class="form-group">
 
-                        <div class="col-lg-4">
+                        <label>Customer</label>
 
-                            <div class="form-group mb-4">
+                        <select name="customer_id" class="form-control" required>
 
-                                <label>Customer</label>
+                            <option value="">-- Pilih Customer --</option>
 
-                                <select name="customer_id" class="form-control" required>
+                            @foreach ($customers as $customer)
+                                <option value="{{ $customer->id }}">
+                                    {{ $customer->name }}
+                                </option>
+                            @endforeach
 
-                                    <option value="">-- Pilih Customer --</option>
-
-                                    @foreach ($customers as $customer)
-                                        <option value="{{ $customer->id }}">
-                                            {{ $customer->name }}
-                                        </option>
-                                    @endforeach
-
-                                </select>
-
-                            </div>
-
-                        </div>
+                        </select>
 
                     </div>
 
                     <hr>
 
-                    <h5 class="mb-3">Pilih Produk</h5>
+                    <h5>Pilih Produk</h5>
 
-                    <div class="table-responsive">
+                    <table class="table table-bordered">
 
-                        <table class="table table-bordered align-middle">
+                        <thead>
+                            <tr>
+                                <th>Produk</th>
+                                <th>Harga</th>
+                                <th width="120">Qty</th>
+                            </tr>
+                        </thead>
 
-                            <thead class="table-light">
+                        <tbody>
 
+                            @foreach ($products as $product)
                                 <tr>
-                                    <th width="250">Produk</th>
-                                    <th width="200">Harga</th>
-                                    <th width="120">Qty</th>
+
+                                    <td>
+
+                                        <label>
+                                            <input type="checkbox" name="products[]" value="{{ $product->id }}">
+                                            {{ $product->name }}
+                                        </label>
+
+                                    </td>
+
+                                    <td>
+                                        Rp {{ number_format($product->price, 0, ',', '.') }}
+                                    </td>
+
+                                    <td>
+
+                                        <input type="number" name="quantities[]" value="1" min="1"
+                                            class="form-control">
+
+                                    </td>
+
                                 </tr>
+                            @endforeach
 
-                            </thead>
+                        </tbody>
 
-                            <tbody>
+                    </table>
 
-                                @foreach ($products as $product)
-                                    <tr>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Simpan Order
+                    </button>
 
-                                        <td>
-
-                                            <label>
-
-                                                <input type="checkbox" name="products[]" value="{{ $product->id }}"
-                                                    class="me-2">
-
-                                                {{ $product->name }}
-
-                                            </label>
-
-                                        </td>
-
-                                        <td>
-
-                                            Rp {{ number_format($product->price, 0, ',', '.') }}
-
-                                        </td>
-
-                                        <td>
-
-                                            <input type="number" name="quantities[]" value="1" min="1"
-                                                class="form-control" style="width:100px">
-
-                                        </td>
-
-                                    </tr>
-                                @endforeach
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                    <div class="mt-3">
-
-                        <button class="btn btn-primary">
-
-                            <i class="fas fa-save"></i>
-                            Buat Order
-
-                        </button>
-
-                        <a href="{{ route('orders.index') }}" class="btn btn-secondary">
-
-                            Kembali
-
-                        </a>
-
-                    </div>
+                    <a href="{{ route('orders.index') }}" class="btn btn-secondary">
+                        Kembali
+                    </a>
 
                 </form>
 
             </div>
-
         </div>
 
     </div>

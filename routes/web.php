@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 | CONTROLLERS
 |--------------------------------------------------------------------------
 */
-
+use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
@@ -99,6 +99,9 @@ Route::get(
     [OrderController::class,'invoice']
 )->name('orders.invoice');
     
+Route::post('/orders/{order}/verify',
+    [OrderController::class,'verify'])
+    ->name('orders.verify');
 
     /*
     | PAYMENT
@@ -114,11 +117,14 @@ Route::get(
         [PaymentController::class,'store']
     )->name('payments.store');
 
-    Route::get('/payment-settings',[PaymentSettingController::class,'edit'])
-    ->name('payment.settings');
+Route::get('/payment-settings',[PaymentSettingController::class,'index'])
+->name('payment.settings.index');
 
-Route::post('/payment-settings',[PaymentSettingController::class,'update'])
-    ->name('payment.settings.update');
+Route::get('/payment-settings/edit',[PaymentSettingController::class,'edit'])
+->name('payment.settings.edit');
+
+Route::post('/payment-settings/update',[PaymentSettingController::class,'update'])
+->name('payment.settings.update');
 
     /*
     | REPORTS
@@ -135,5 +141,6 @@ Route::post('/payment-settings',[PaymentSettingController::class,'update'])
         );
 
     })->name('reports.export');
+    
 
 });

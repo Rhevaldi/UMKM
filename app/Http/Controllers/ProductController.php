@@ -29,18 +29,38 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-                $request->validate([
-            'category_id' => 'required',
-            'name' => 'required',
-            'price' => 'required|numeric',
-            'stock' => 'required|integer'
-        ]);
+public function store(Request $request)
+{
 
-        Product::create($request->all());
-        return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan');
-    }
+$request->validate([
+'category_id' => 'required',
+'name' => 'required',
+'price' => 'required|numeric',
+'stock' => 'required|integer',
+'image' => 'nullable|image'
+]);
+
+$data = $request->all();
+
+if($request->hasFile('image')){
+
+$file = $request->file('image');
+
+$filename = time().'.'.$file->getClientOriginalExtension();
+
+$file->move(public_path('uploads/products'), $filename);
+
+$data['image'] = 'uploads/products/'.$filename;
+
+}
+
+Product::create($data);
+
+return redirect()
+->route('products.index')
+->with('success','Produk berhasil ditambahkan');
+
+}
 
     /**
      * Display the specified resource.

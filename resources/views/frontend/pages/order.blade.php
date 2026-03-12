@@ -4,7 +4,76 @@
 
 @section('content')
 
-    <section class="py-5 bg-light">
+    <style>
+        .menu-card {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid #eee;
+            transition: .25s;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .08);
+        }
+
+        .menu-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .menu-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .menu-price {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .qty-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: #f1f5f9;
+            font-weight: bold;
+        }
+
+        .qty-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .qty-input {
+            width: 55px;
+            text-align: center;
+        }
+
+        .checkout-card {
+            border-radius: 16px;
+        }
+
+        .total-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 18px;
+        }
+    </style>
+
+
+
+    <section class="py-5 bg-light" style="min-height:85vh">
 
         <div class="container">
 
@@ -15,53 +84,82 @@
                 </h2>
 
                 <p class="text-muted">
-                    Pilih produk dan isi data Anda
+                    Pilih menu favorit Anda
                 </p>
 
             </div>
 
 
-            <form action="{{ route('order.public') }}" method="POST">
+            <form id="orderForm" action="{{ route('order.public') }}" method="POST">
 
                 @csrf
 
                 <div class="row g-4">
 
-                    {{-- PRODUK --}}
+                    {{-- LIST PRODUK --}}
                     <div class="col-lg-7">
 
-                        <div class="card shadow-sm border-0 p-4">
-
-                            <h5 class="mb-4">
-                                Daftar Produk
-                            </h5>
+                        <div class="row">
 
                             @foreach ($products as $product)
-                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                @if ($product->stock > 0)
+                                    <div class="col-md-6 mb-3">
 
-                                    <div>
+                                        <div class="menu-card">
 
-                                        <label>
+                                            <div class="d-flex justify-content-between">
 
-                                            <input type="checkbox" name="products[]" value="{{ $product->id }}"
-                                                class="product-check me-2" data-price="{{ $product->price }}">
+                                                <div class="d-flex gap-3">
 
-                                            <strong>{{ $product->name }}</strong>
+                                                    @if ($product->image)
+                                                        <img src="{{ asset($product->image) }}" class="menu-img">
+                                                    @else
+                                                        <img src="{{ asset('images/no-image.png') }}" class="menu-img">
+                                                    @endif
 
-                                        </label>
+                                                    <div>
 
-                                        <div class="text-muted small">
+                                                        <label class="menu-title">
 
-                                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                                                            <input type="checkbox" class="product-check me-2"
+                                                                name="products[]" value="{{ $product->id }}"
+                                                                data-price="{{ $product->price }}">
+
+                                                            {{ $product->name }}
+
+                                                        </label>
+
+                                                        <div class="menu-price">
+                                                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                                                        </div>
+
+                                                        <small class="text-muted">
+                                                            Stok {{ $product->stock }}
+                                                        </small>
+
+                                                    </div>
+
+                                                </div>
+
+
+                                                <div class="qty-box">
+
+                                                    <button type="button" class="qty-btn minus">-</button>
+
+                                                    <input type="number" class="form-control qty-input quantity-input"
+                                                        name="quantities[]" value="1" min="1"
+                                                        max="{{ $product->stock }}" disabled>
+
+                                                    <button type="button" class="qty-btn plus">+</button>
+
+                                                </div>
+
+                                            </div>
 
                                         </div>
 
                                     </div>
-
-                                    <input type="number" name="quantities[]" value="1" min="1"
-                                        class="form-control quantity-input" style="width:90px">
-
-                                </div>
+                                @endif
                             @endforeach
 
                         </div>
@@ -69,36 +167,46 @@
                     </div>
 
 
-                    {{-- CUSTOMER --}}
+
+                    {{-- CHECKOUT --}}
                     <div class="col-lg-5">
 
-                        <div class="card shadow border-0 p-4">
+                        <div class="card checkout-card shadow-sm border-0">
 
-                            <h5 class="mb-4">
-                                Data Pemesan
-                            </h5>
+                            <div class="card-body">
 
-                            <input type="text" name="name" class="form-control mb-3" placeholder="Nama Lengkap"
-                                required>
+                                <h5 class="fw-bold mb-4">
+                                    Data Pemesan
+                                </h5>
 
-                            <input type="text" name="phone" class="form-control mb-3" placeholder="No WhatsApp"
-                                required>
+                                <input type="text" name="name" class="form-control mb-3" placeholder="Nama Lengkap"
+                                    required>
 
-                            <div class="alert alert-light">
+                                <input type="text" name="phone" class="form-control mb-4" placeholder="No WhatsApp"
+                                    required>
 
-                                <strong>Total:</strong>
 
-                                <span id="totalPrice">
-                                    Rp 0
-                                </span>
+
+                                <div class="total-box d-flex justify-content-between mb-4">
+
+                                    <span>Total</span>
+
+                                    <span class="fw-bold text-success fs-5" id="totalPrice">
+
+                                        Rp 0
+
+                                    </span>
+
+                                </div>
+
+
+                                <button class="btn btn-success w-100 btn-lg">
+
+                                    Lanjut ke Pembayaran
+
+                                </button>
 
                             </div>
-
-                            <button class="btn btn-success w-100 btn-lg">
-
-                               Lanjut ke Pembayaran
-
-                            </button>
 
                         </div>
 
@@ -111,5 +219,119 @@
         </div>
 
     </section>
+
+@endsection
+
+
+
+@section('scripts')
+
+    <script>
+        function calculateTotal() {
+
+            let total = 0;
+
+            document.querySelectorAll('.menu-card').forEach(card => {
+
+                const check = card.querySelector('.product-check');
+                const qty = card.querySelector('.quantity-input');
+
+                if (check && check.checked) {
+
+                    const price = parseInt(check.dataset.price);
+                    const quantity = parseInt(qty.value);
+
+                    total += price * quantity;
+
+                }
+
+            });
+
+            document.getElementById('totalPrice').innerText =
+                "Rp " + total.toLocaleString('id-ID');
+
+        }
+
+
+
+        document.querySelectorAll('.product-check').forEach(check => {
+
+            check.addEventListener('change', function() {
+
+                const card = this.closest('.menu-card');
+                const qty = card.querySelector('.quantity-input');
+
+                qty.disabled = !this.checked;
+
+                calculateTotal();
+
+            });
+
+        });
+
+
+
+        document.querySelectorAll('.plus').forEach(btn => {
+
+            btn.addEventListener('click', function() {
+
+                const input = this.parentElement.querySelector('.quantity-input');
+
+                if (input.disabled) return;
+
+                input.value = parseInt(input.value) + 1;
+
+                calculateTotal();
+
+            });
+
+        });
+
+
+
+        document.querySelectorAll('.minus').forEach(btn => {
+
+            btn.addEventListener('click', function() {
+
+                const input = this.parentElement.querySelector('.quantity-input');
+
+                if (input.disabled) return;
+
+                if (input.value > 1) {
+
+                    input.value = parseInt(input.value) - 1;
+
+                    calculateTotal();
+
+                }
+
+            });
+
+        });
+
+
+
+        document.querySelectorAll('.quantity-input').forEach(input => {
+
+            input.addEventListener('input', calculateTotal);
+
+        });
+
+
+
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+
+            const checked = document.querySelectorAll('.product-check:checked');
+
+            if (checked.length === 0) {
+
+                alert("Silakan pilih minimal 1 produk");
+
+                e.preventDefault();
+
+            }
+
+        });
+    </script>
 
 @endsection

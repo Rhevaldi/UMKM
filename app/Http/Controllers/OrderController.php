@@ -154,4 +154,25 @@ public function invoice(Order $order)
     return $pdf->download('invoice-'.$order->order_code.'.pdf');
 }
 
+// =============================== verifikasi pembayaran admin ==============================
+public function verify(Order $order)
+{
+    foreach ($order->items as $item) {
+
+        $product = $item->product;
+
+        $product->stock = max(0, $product->stock - $item->quantity);
+
+        $product->save();
+    }
+
+    $order->update([
+        'status' => 'paid'
+    ]);
+
+    return redirect()
+        ->route('orders.index')
+        ->with('success','Pesanan berhasil diverifikasi');
+}
+
 }

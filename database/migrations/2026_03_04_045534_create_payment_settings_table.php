@@ -6,24 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
-{
-    Schema::create('payment_settings', function (Blueprint $table) {
-        $table->id();
-        $table->string('bank_name')->nullable();
-        $table->string('account_number')->nullable();
-        $table->string('account_name')->nullable();
-        $table->string('qris_image')->nullable();
-        $table->timestamps();
-    });
-}
+    public function up(): void
+    {
+        Schema::create('payment_settings', function (Blueprint $table) {
 
-    /**
-     * Reverse the migrations.
-     */
+            $table->id();
+
+            $table->string('bank_name')->nullable();
+            $table->string('account_number')->nullable();
+            $table->string('account_name')->nullable();
+
+           
+            $table->string('admin_whatsapp')->nullable();
+
+            $table->string('qris_image')->nullable();
+
+            $table->timestamps();
+
+        });
+    }
+
     public function down(): void
     {
         Schema::dropIfExists('payment_settings');

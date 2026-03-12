@@ -2,8 +2,7 @@
 
     {{-- BRAND --}}
     <a href="{{ route('dashboard') }}" class="brand-link">
-        <img src="{{ asset('adminlte/dist/img/AdminLTELogo.png') }}"
-            class="brand-image img-circle elevation-3"
+        <img src="{{ asset('adminlte/dist/img/AdminLTELogo.png') }}" class="brand-image img-circle elevation-3"
             style="opacity:.8">
 
         <span class="brand-text font-weight-light">
@@ -17,8 +16,7 @@
         {{-- USER PANEL --}}
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ asset('adminlte/dist/img/umkm.jpg') }}"
-                    class="img-circle elevation-2">
+                <img src="{{ asset('adminlte/dist/img/umkm.jpg') }}" class="img-circle elevation-2">
             </div>
 
             <div class="info">
@@ -32,9 +30,7 @@
         {{-- MENU --}}
         <nav class="mt-2">
 
-            <ul class="nav nav-pills nav-sidebar flex-column"
-                data-widget="treeview"
-                role="menu"
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                 data-accordion="false">
 
 
@@ -97,7 +93,7 @@
 
                         <i class="nav-icon fas fa-shopping-cart"></i>
 
-                        <p>Pesanan</p>
+                        <p>Penjualan</p>
 
                     </a>
 
@@ -151,16 +147,13 @@
 
                 {{-- PAYMENT SETTING --}}
                 <li class="nav-item">
-
-                    <a href="{{ route('payment.settings') }}"
-                        class="nav-link {{ request()->routeIs('payment.settings') ? 'active' : '' }}">
+                    <a href="{{ route('payment.settings.index') }}" class="nav-link">
 
                         <i class="nav-icon fas fa-credit-card"></i>
 
                         <p>Pengaturan Pembayaran</p>
 
                     </a>
-
                 </li>
 
 

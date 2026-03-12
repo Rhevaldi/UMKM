@@ -8,37 +8,53 @@ use App\Models\PaymentSetting;
 class PaymentSettingController extends Controller
 {
 
-public function edit()
-{
-    $setting = PaymentSetting::first();
+    public function index()
+    {
+        $setting = PaymentSetting::first();
 
-    return view('payment_settings.edit',compact('setting'));
-}
-
-public function update(Request $request)
-{
-    $setting = PaymentSetting::first();
-
-    if(!$setting){
-        $setting = new PaymentSetting();
+        return view('payment_settings.index', compact('setting'));
     }
 
-    if($request->hasFile('qris_image')){
 
-        $file = $request->file('qris_image');
-        $filename = time().'.'.$file->getClientOriginalExtension();
-        $file->move(public_path('uploads'),$filename);
+    public function edit()
+    {
+        $setting = PaymentSetting::first();
 
-        $setting->qris_image = 'uploads/'.$filename;
+        return view('payment_settings.edit', compact('setting'));
     }
 
-    $setting->bank_name = $request->bank_name;
-    $setting->account_number = $request->account_number;
-    $setting->account_name = $request->account_name;
 
-    $setting->save();
+    public function update(Request $request)
+    {
 
-    return back()->with('success','Pengaturan pembayaran diperbarui');
-}
+        $setting = PaymentSetting::first();
+
+        if (!$setting) {
+            $setting = new PaymentSetting();
+        }
+
+        $setting->bank_name = $request->bank_name;
+        $setting->account_number = $request->account_number;
+        $setting->account_name = $request->account_name;
+        $setting->admin_whatsapp = $request->admin_whatsapp;
+
+        // upload qris
+        if ($request->hasFile('qris_image')) {
+
+            $file = $request->file('qris_image');
+
+            $filename = time().'_'.$file->getClientOriginalName();
+
+            $file->move(public_path('uploads/qris'), $filename);
+
+            $setting->qris_image = 'uploads/qris/'.$filename;
+        }
+
+        $setting->save();
+
+        return redirect()
+            ->route('payment.settings.index')
+            ->with('success','Pengaturan pembayaran berhasil disimpan');
+    }
 
 }

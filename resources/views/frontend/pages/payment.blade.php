@@ -35,26 +35,46 @@
 
                             <hr>
 
+
+                        
                             <h5 class="mb-3">Scan QRIS</h5>
 
                             @if ($setting && $setting->qris_image)
-                                <img src="{{ asset($setting->qris_image) }}" style="max-width:250px">
+                                <img src="{{ asset($setting->qris_image) }}" style="max-width:250px" class="mb-4">
+                            @else
+                                <div class="alert alert-warning">
+                                    Penjual belum menyertakan QRIS untuk pembayaran.
+                                  
+                                </div>
                             @endif
 
+
                             <hr>
+
 
                             <h5>Transfer Bank</h5>
 
-                            <p class="mb-1">
-                                {{ $setting->bank_name }}
-                                : <strong>{{ $setting->account_number }}</strong>
-                            </p>
+                            @if ($setting && $setting->bank_name && $setting->account_number)
+                                <p class="mb-1">
+                                    {{ $setting->bank_name }}
+                                    : <strong>{{ $setting->account_number }}</strong>
+                                </p>
 
-                            <p class="mb-4">
-                                a.n {{ $setting->account_name }}
-                            </p>
+                                <p class="mb-4">
+                                    a.n {{ $setting->account_name }}
+                                </p>
+                            @else
+                                <div class="alert alert-warning">
+                                    Penjual belum menyertakan nomor rekening tujuan.
+                                    Silakan hubungi admin untuk informasi pembayaran.
+                                </div>
+                            @endif
+
 
                             <hr>
+
+
+
 
                             <a href="{{ route('order.whatsapp', $order->id) }}" class="btn btn-success btn-lg w-100">
 

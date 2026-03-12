@@ -1,21 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Manajemen Order')
+@section('title', 'Manajemen Penjualan')
 
 @section('content')
 
     <div class="container-fluid">
 
         {{-- HEADER --}}
-        <div class="content-header mb-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center mb-3">
 
-            <h3 class="m-0">
-                <i class="fas fa-shopping-cart mr-2"></i>
-                Manajemen Order
+            <h3 class="m-0 font-weight-bold">
+                <i class="fas fa-shopping-cart text-primary mr-2"></i>
+                Manajemen Penjualan
             </h3>
 
             <a href="{{ route('orders.create') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i>
+                <i class="fas fa-plus mr-1"></i>
                 Buat Order
             </a>
 
@@ -40,32 +40,24 @@
 
 
         {{-- CARD --}}
-        <div class="card shadow-sm">
-
-            <div class="card-header">
-
-                <h5 class="mb-0">
-                    Daftar Order
-                </h5>
-
-            </div>
-
+        <div class="card shadow-sm border-0">
 
             <div class="card-body p-0">
 
                 <div class="table-responsive">
 
-                    <table class="table table-hover table-striped align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0">
 
-                        <thead class="table-dark">
+                        <thead class="bg-dark text-white">
 
                             <tr>
-                                <th width="150">Order Code</th>
-                                <th>Tanggal</th>
+                                <th width="150">Kode</th>
+                                <th width="180">Tanggal</th>
                                 <th>Customer</th>
+                                <th width="120">Item</th>
                                 <th width="180">Total</th>
                                 <th width="120">Status</th>
-                                <th width="220">Aksi</th>
+                                <th width="220" class="text-center">Aksi</th>
                             </tr>
 
                         </thead>
@@ -76,15 +68,14 @@
                             @forelse($orders as $order)
                                 <tr>
 
-                                    {{-- CODE --}}
+                                    {{-- KODE --}}
                                     <td>
-                                        <strong>
-                                            {{ $order->order_code }}
-                                        </strong>
+                                        <strong>{{ $order->order_code }}</strong>
                                     </td>
 
 
-                                    {{-- DATE --}}
+
+                                    {{-- TANGGAL --}}
                                     <td>
 
                                         {{ $order->created_at->format('d M Y') }}
@@ -98,37 +89,57 @@
                                     </td>
 
 
+
                                     {{-- CUSTOMER --}}
                                     <td>
 
-                                        {{ $order->customer->name ?? 'Customer' }}
+                                        <i class="fas fa-user text-muted mr-1"></i>
+
+                                        {{ $order->customer->name ?? '-' }}
 
                                     </td>
+
+
+
+                                    {{-- ITEM --}}
+                                    <td>
+
+                                        <span class="badge badge-info px-3 py-2">
+
+                                            {{ $order->items->count() }} Item
+
+                                        </span>
+
+                                    </td>
+
 
 
                                     {{-- TOTAL --}}
                                     <td>
 
-                                        <strong>
+                                        <strong class="text-success">
+
                                             Rp {{ number_format($order->total_amount, 0, ',', '.') }}
+
                                         </strong>
 
                                     </td>
+
 
 
                                     {{-- STATUS --}}
                                     <td>
 
                                         @if ($order->status == 'paid')
-                                            <span class="badge bg-success">
+                                            <span class="badge badge-success px-3 py-2">
                                                 Paid
                                             </span>
                                         @elseif($order->status == 'pending')
-                                            <span class="badge bg-warning">
+                                            <span class="badge badge-warning px-3 py-2">
                                                 Pending
                                             </span>
                                         @else
-                                            <span class="badge bg-danger">
+                                            <span class="badge badge-danger px-3 py-2">
                                                 Cancelled
                                             </span>
                                         @endif
@@ -136,90 +147,91 @@
                                     </td>
 
 
+
                                     {{-- ACTION --}}
-                                    <td>
+                                    <td class="text-center">
 
+                                        <div class="btn-group btn-group-sm">
 
-                                        {{-- VIEW --}}
-                                        <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info btn-sm"
-                                            title="Detail">
+                                            {{-- DETAIL --}}
+                                            <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info"
+                                                title="Detail">
 
-                                            <i class="fas fa-eye"></i>
-
-                                        </a>
-
-
-
-                                        {{-- INVOICE --}}
-                                        <a href="{{ route('orders.invoice', $order->id) }}" class="btn btn-secondary btn-sm"
-                                            title="Invoice">
-
-                                            <i class="fas fa-file-pdf"></i>
-
-                                        </a>
-
-
-
-                                        {{-- WHATSAPP --}}
-                                        <a href="{{ route('orders.whatsapp', $order->id) }}" class="btn btn-success btn-sm"
-                                            title="WhatsApp Customer">
-
-                                            <i class="fab fa-whatsapp"></i>
-
-                                        </a>
-
-
-
-                                        {{-- PAYMENT --}}
-                                        @if ($order->status == 'pending')
-                                            <a href="{{ route('payments.create', $order->id) }}"
-                                                class="btn btn-primary btn-sm" title="Pembayaran">
-
-                                                <i class="fas fa-credit-card"></i>
+                                                <i class="fas fa-eye"></i>
 
                                             </a>
-                                        @endif
 
 
 
-                                        {{-- DELETE --}}
-                                        <form action="{{ route('orders.destroy', $order->id) }}" method="POST"
-                                            class="d-inline">
+                                            {{-- INVOICE --}}
+                                            <a href="{{ route('orders.invoice', $order->id) }}" class="btn btn-secondary"
+                                                title="Invoice">
 
-                                            @csrf
-                                            @method('DELETE')
+                                                <i class="fas fa-file-pdf"></i>
 
-                                            <button onclick="return confirm('Hapus order ini?')"
-                                                class="btn btn-danger btn-sm" title="Hapus">
+                                            </a>
 
-                                                <i class="fas fa-trash"></i>
 
-                                            </button>
 
-                                        </form>
+                                            {{-- VERIFIKASI --}}
+                                            @if ($order->status == 'pending')
+                                                <form action="{{ route('orders.verify', $order->id) }}" method="POST"
+                                                    class="d-inline">
 
+                                                    @csrf
+
+                                                    <button class="btn btn-success"
+                                                        onclick="return confirm('Verifikasi pesanan ini?')"
+                                                        title="Verifikasi">
+
+                                                        <i class="fas fa-check"></i>
+
+                                                    </button>
+
+                                                </form>
+                                            @endif
+
+
+
+                                            {{-- DELETE --}}
+                                            <form action="{{ route('orders.destroy', $order->id) }}" method="POST"
+                                                class="d-inline">
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button class="btn btn-danger" onclick="return confirm('Hapus order ini?')"
+                                                    title="Hapus">
+
+                                                    <i class="fas fa-trash"></i>
+
+                                                </button>
+
+                                            </form>
+
+                                        </div>
 
                                     </td>
 
                                 </tr>
+
 
                             @empty
 
                                 <tr>
 
-                                    <td colspan="6" class="text-center text-muted py-4">
+                                    <td colspan="7" class="text-center py-5">
 
-                                        <i class="fas fa-box-open fa-2x mb-2"></i>
+                                        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
 
-                                        <br>
-
-                                        Belum ada order
+                                        <p class="text-muted mb-0">
+                                            Belum ada penjualan
+                                        </p>
 
                                     </td>
 
                                 </tr>
                             @endforelse
-
 
                         </tbody>
 
