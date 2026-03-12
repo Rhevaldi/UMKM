@@ -6,21 +6,22 @@
 
     <style>
         .menu-card {
-            background: white;
-            border-radius: 16px;
-            padding: 18px;
-            border: 1px solid #eee;
-            transition: .25s;
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            transition: all .2s ease;
+            height: 100%;
         }
 
         .menu-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, .08);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
         }
 
         .menu-img {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 10px;
             object-fit: cover;
         }
@@ -35,6 +36,11 @@
             font-weight: 600;
         }
 
+        .stock-text {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
         .qty-box {
             display: flex;
             align-items: center;
@@ -46,34 +52,35 @@
             height: 32px;
             border-radius: 8px;
             border: none;
-            background: #f1f5f9;
+            background: #f3f4f6;
             font-weight: bold;
+            cursor: pointer;
         }
 
         .qty-btn:hover {
-            background: #e2e8f0;
+            background: #e5e7eb;
         }
 
         .qty-input {
-            width: 55px;
+            width: 50px;
             text-align: center;
         }
 
         .checkout-card {
-            border-radius: 16px;
+            border-radius: 14px;
         }
 
         .total-box {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 16px;
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 14px;
             font-size: 18px;
         }
     </style>
 
 
 
-    <section class="py-5 bg-light" style="min-height:85vh">
+    <section class="py-5 bg-light">
 
         <div class="container">
 
@@ -107,7 +114,7 @@
 
                                         <div class="menu-card">
 
-                                            <div class="d-flex justify-content-between">
+                                            <div class="d-flex justify-content-between align-items-center">
 
                                                 <div class="d-flex gap-3">
 
@@ -117,9 +124,10 @@
                                                         <img src="{{ asset('images/no-image.png') }}" class="menu-img">
                                                     @endif
 
+
                                                     <div>
 
-                                                        <label class="menu-title">
+                                                        <label class="menu-title d-block">
 
                                                             <input type="checkbox" class="product-check me-2"
                                                                 name="products[]" value="{{ $product->id }}"
@@ -133,9 +141,9 @@
                                                             Rp {{ number_format($product->price, 0, ',', '.') }}
                                                         </div>
 
-                                                        <small class="text-muted">
+                                                        <div class="stock-text">
                                                             Stok {{ $product->stock }}
-                                                        </small>
+                                                        </div>
 
                                                     </div>
 
@@ -192,18 +200,14 @@
                                     <span>Total</span>
 
                                     <span class="fw-bold text-success fs-5" id="totalPrice">
-
                                         Rp 0
-
                                     </span>
 
                                 </div>
 
 
                                 <button class="btn btn-success w-100 btn-lg">
-
                                     Lanjut ke Pembayaran
-
                                 </button>
 
                             </div>
@@ -236,7 +240,7 @@
                 const check = card.querySelector('.product-check');
                 const qty = card.querySelector('.quantity-input');
 
-                if (check && check.checked) {
+                if (check.checked) {
 
                     const price = parseInt(check.dataset.price);
                     const quantity = parseInt(qty.value);
@@ -254,6 +258,7 @@
 
 
 
+        // aktifkan qty saat produk dicentang
         document.querySelectorAll('.product-check').forEach(check => {
 
             check.addEventListener('change', function() {
@@ -271,6 +276,7 @@
 
 
 
+        // tombol plus
         document.querySelectorAll('.plus').forEach(btn => {
 
             btn.addEventListener('click', function() {
@@ -279,7 +285,14 @@
 
                 if (input.disabled) return;
 
-                input.value = parseInt(input.value) + 1;
+                let max = parseInt(input.max);
+                let val = parseInt(input.value);
+
+                if (val < max) {
+
+                    input.value = val + 1;
+
+                }
 
                 calculateTotal();
 
@@ -289,6 +302,7 @@
 
 
 
+        // tombol minus
         document.querySelectorAll('.minus').forEach(btn => {
 
             btn.addEventListener('click', function() {
@@ -297,13 +311,15 @@
 
                 if (input.disabled) return;
 
-                if (input.value > 1) {
+                let val = parseInt(input.value);
 
-                    input.value = parseInt(input.value) - 1;
+                if (val > 1) {
 
-                    calculateTotal();
+                    input.value = val - 1;
 
                 }
+
+                calculateTotal();
 
             });
 
@@ -311,14 +327,30 @@
 
 
 
+        // input manual
         document.querySelectorAll('.quantity-input').forEach(input => {
 
-            input.addEventListener('input', calculateTotal);
+            input.addEventListener('input', function() {
+
+                let max = parseInt(this.max);
+
+                if (this.value > max) {
+                    this.value = max;
+                }
+
+                if (this.value < 1) {
+                    this.value = 1;
+                }
+
+                calculateTotal();
+
+            });
 
         });
 
 
 
+        // validasi submit
         document.getElementById('orderForm').addEventListener('submit', function(e) {
 
             const checked = document.querySelectorAll('.product-check:checked');
