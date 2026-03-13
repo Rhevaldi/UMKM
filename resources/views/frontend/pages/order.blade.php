@@ -4,157 +4,101 @@
 
 @section('content')
 
-    <style>
-        .menu-card {
-            background: #fff;
-            border-radius: 14px;
-            border: 1px solid #e5e7eb;
-            padding: 16px;
-            transition: all .2s ease;
-            height: 100%;
-        }
-
-        .menu-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
-        }
-
-        .menu-img {
-            width: 70px;
-            height: 70px;
-            border-radius: 10px;
-            object-fit: cover;
-        }
-
-        .menu-title {
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .menu-price {
-            color: #16a34a;
-            font-weight: 600;
-        }
-
-        .stock-text {
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        .qty-box {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .qty-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: none;
-            background: #f3f4f6;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .qty-btn:hover {
-            background: #e5e7eb;
-        }
-
-        .qty-input {
-            width: 50px;
-            text-align: center;
-        }
-
-        .checkout-card {
-            border-radius: 14px;
-        }
-
-        .total-box {
-            background: #f9fafb;
-            border-radius: 10px;
-            padding: 14px;
-            font-size: 18px;
-        }
-    </style>
-
-
-
-    <section class="py-5 bg-light">
+    <section class="order-section py-5">
 
         <div class="container">
 
-            <div class="text-center mb-5">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Pesan Produk</h2>
+                <p class="text-muted">Pilih menu favorit Anda</p>
+            </div>
 
-                <h2 class="fw-bold">
-                    Pesan Produk
-                </h2>
+            {{-- SEARCH --}}
+            <div class="row justify-content-center mb-3">
 
-                <p class="text-muted">
-                    Pilih menu favorit Anda
-                </p>
+                <div class="col-lg-6">
+
+                    <input type="text" id="searchMenu" class="form-control search-input" placeholder="Cari menu...">
+
+                </div>
+
+            </div>
+
+
+            <div class="text-center mb-4">
+
+                <button class="btn btn-outline-success filter-btn active" data-filter="all">
+                    Semua
+                </button>
+
+                @foreach ($categories as $category)
+                    <button class="btn btn-outline-success filter-btn" data-filter="{{ strtolower($category->name) }}">
+
+                        {{ $category->name }}
+
+                    </button>
+                @endforeach
 
             </div>
 
 
             <form id="orderForm" action="{{ route('order.public') }}" method="POST">
-
                 @csrf
 
                 <div class="row g-4">
 
-                    {{-- LIST PRODUK --}}
-                    <div class="col-lg-7">
+                    {{-- PRODUK --}}
+                    <div class="col-lg-8">
 
-                        <div class="row">
+                        <div class="row g-4" id="productList">
 
                             @foreach ($products as $product)
                                 @if ($product->stock > 0)
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-6 col-xl-4 product-item" data-name="{{ strtolower($product->name) }}"
+                                        data-category="{{ strtolower($product->category->name ?? 'lainnya') }}">
 
-                                        <div class="menu-card">
+                                        <div class="product-card">
 
-                                            <div class="d-flex justify-content-between align-items-center">
+                                            {{-- BEST SELLER --}}
+                                            @if ($loop->index < 2)
+                                                <div class="badge-best">🔥 Best Seller</div>
+                                            @endif
 
-                                                <div class="d-flex gap-3">
+                                            <div class="product-image">
 
-                                                    @if ($product->image)
-                                                        <img src="{{ asset($product->image) }}" class="menu-img">
-                                                    @else
-                                                        <img src="{{ asset('images/no-image.png') }}" class="menu-img">
-                                                    @endif
+                                                @if ($product->image)
+                                                    <img src="{{ asset($product->image) }}">
+                                                @else
+                                                    <img src="{{ asset('images/no-image.png') }}">
+                                                @endif
 
+                                            </div>
 
-                                                    <div>
+                                            <div class="product-body">
 
-                                                        <label class="menu-title d-block">
+                                                <label class="product-title">
 
-                                                            <input type="checkbox" class="product-check me-2"
-                                                                name="products[]" value="{{ $product->id }}"
-                                                                data-price="{{ $product->price }}">
+                                                    <input type="checkbox" class="product-check" name="products[]"
+                                                        value="{{ $product->id }}" data-price="{{ $product->price }}"
+                                                        data-name="{{ $product->name }}">
 
-                                                            {{ $product->name }}
+                                                    {{ $product->name }}
 
-                                                        </label>
+                                                </label>
 
-                                                        <div class="menu-price">
-                                                            Rp {{ number_format($product->price, 0, ',', '.') }}
-                                                        </div>
-
-                                                        <div class="stock-text">
-                                                            Stok {{ $product->stock }}
-                                                        </div>
-
-                                                    </div>
-
+                                                <div class="product-price">
+                                                    Rp {{ number_format($product->price, 0, ',', '.') }}
                                                 </div>
 
+                                                <div class="stock-text">
+                                                    Stok {{ $product->stock }}
+                                                </div>
 
                                                 <div class="qty-box">
 
-                                                    <button type="button" class="qty-btn minus">-</button>
+                                                    <button type="button" class="qty-btn minus">−</button>
 
-                                                    <input type="number" class="form-control qty-input quantity-input"
+                                                    <input type="number" class="qty-input quantity-input"
                                                         name="quantities[]" value="1" min="1"
                                                         max="{{ $product->stock }}" disabled>
 
@@ -175,42 +119,35 @@
                     </div>
 
 
+                    {{-- CART --}}
+                    <div class="col-lg-4">
 
-                    {{-- CHECKOUT --}}
-                    <div class="col-lg-5">
+                        <div class="checkout-card">
 
-                        <div class="card checkout-card shadow-sm border-0">
+                            <div class="floating-cart" id="floatingCart">
 
-                            <div class="card-body">
+                                <h6 class="fw-bold mb-2">🛒 Keranjang</h6>
 
-                                <h5 class="fw-bold mb-4">
-                                    Data Pemesan
-                                </h5>
+                                <ul id="cartList" class="cart-list"></ul>
 
-                                <input type="text" name="name" class="form-control mb-3" placeholder="Nama Lengkap"
-                                    required>
-
-                                <input type="text" name="phone" class="form-control mb-4" placeholder="No WhatsApp"
-                                    required>
-
-
-
-                                <div class="total-box d-flex justify-content-between mb-4">
-
-                                    <span>Total</span>
-
-                                    <span class="fw-bold text-success fs-5" id="totalPrice">
-                                        Rp 0
-                                    </span>
-
+                                <div class="cart-total">
+                                    Total : <span id="totalPrice">Rp 0</span>
                                 </div>
 
-
-                                <button class="btn btn-success w-100 btn-lg">
-                                    Lanjut ke Pembayaran
-                                </button>
+                                
 
                             </div>
+
+                            <hr>
+
+                            <input type="text" name="name" class="form-control mb-3" placeholder="Nama Lengkap"
+                                required>
+
+                            <input type="text" name="phone" class="form-control" placeholder="No WhatsApp" required>
+
+                           <button class="btn btn-success w-100 mt-3">
+                                    Checkout
+                                </button>
 
                         </div>
 
@@ -222,6 +159,8 @@
 
         </div>
 
+
+
     </section>
 
 @endsection
@@ -231,137 +170,173 @@
 @section('scripts')
 
     <script>
-        function calculateTotal() {
+        document.addEventListener("DOMContentLoaded", function() {
 
-            let total = 0;
-
-            document.querySelectorAll('.menu-card').forEach(card => {
-
-                const check = card.querySelector('.product-check');
-                const qty = card.querySelector('.quantity-input');
-
-                if (check.checked) {
-
-                    const price = parseInt(check.dataset.price);
-                    const quantity = parseInt(qty.value);
-
-                    total += price * quantity;
-
-                }
-
-            });
-
-            document.getElementById('totalPrice').innerText =
-                "Rp " + total.toLocaleString('id-ID');
-
-        }
+            let searchInput = document.getElementById("searchMenu");
+            let filterButtons = document.querySelectorAll(".filter-btn");
+            let products = document.querySelectorAll(".product-item");
 
 
-
-        // aktifkan qty saat produk dicentang
-        document.querySelectorAll('.product-check').forEach(check => {
-
-            check.addEventListener('change', function() {
-
-                const card = this.closest('.menu-card');
-                const qty = card.querySelector('.quantity-input');
-
-                qty.disabled = !this.checked;
-
-                calculateTotal();
-
-            });
-
-        });
+            let currentFilter = "all";
+            let currentSearch = "";
 
 
+            /* FILTER + SEARCH */
 
-        // tombol plus
-        document.querySelectorAll('.plus').forEach(btn => {
+            function filterProducts() {
 
-            btn.addEventListener('click', function() {
+                products.forEach(item => {
 
-                const input = this.parentElement.querySelector('.quantity-input');
+                    let name = item.dataset.name;
+                    let category = item.dataset.category;
 
-                if (input.disabled) return;
+                    let matchSearch = name.includes(currentSearch);
+                    let matchCategory = (currentFilter === "all" || category === currentFilter);
 
-                let max = parseInt(input.max);
-                let val = parseInt(input.value);
+                    item.style.display = (matchSearch && matchCategory) ? "block" : "none";
 
-                if (val < max) {
-
-                    input.value = val + 1;
-
-                }
-
-                calculateTotal();
-
-            });
-
-        });
-
-
-
-        // tombol minus
-        document.querySelectorAll('.minus').forEach(btn => {
-
-            btn.addEventListener('click', function() {
-
-                const input = this.parentElement.querySelector('.quantity-input');
-
-                if (input.disabled) return;
-
-                let val = parseInt(input.value);
-
-                if (val > 1) {
-
-                    input.value = val - 1;
-
-                }
-
-                calculateTotal();
-
-            });
-
-        });
-
-
-
-        // input manual
-        document.querySelectorAll('.quantity-input').forEach(input => {
-
-            input.addEventListener('input', function() {
-
-                let max = parseInt(this.max);
-
-                if (this.value > max) {
-                    this.value = max;
-                }
-
-                if (this.value < 1) {
-                    this.value = 1;
-                }
-
-                calculateTotal();
-
-            });
-
-        });
-
-
-
-        // validasi submit
-        document.getElementById('orderForm').addEventListener('submit', function(e) {
-
-            const checked = document.querySelectorAll('.product-check:checked');
-
-            if (checked.length === 0) {
-
-                alert("Silakan pilih minimal 1 produk");
-
-                e.preventDefault();
+                });
 
             }
+
+
+            /* SEARCH */
+
+            searchInput.addEventListener("keyup", function() {
+
+                currentSearch = this.value.toLowerCase();
+
+                filterProducts();
+
+            });
+
+
+            /* CATEGORY */
+
+            filterButtons.forEach(btn => {
+
+                btn.addEventListener("click", function() {
+
+                    filterButtons.forEach(b => b.classList.remove("active"));
+
+                    this.classList.add("active");
+
+                    currentFilter = this.dataset.filter;
+
+                    filterProducts();
+
+                });
+
+            });
+
+
+            /* CART */
+
+            function updateCart() {
+
+                let total = 0;
+                let html = "";
+
+                document.querySelectorAll(".product-card").forEach(card => {
+
+                    let check = card.querySelector(".product-check");
+                    let qty = card.querySelector(".quantity-input");
+
+                    if (check.checked) {
+
+                        let price = parseInt(check.dataset.price);
+                        let quantity = parseInt(qty.value);
+
+                        total += price * quantity;
+
+                        html += `
+<li>
+<span>${check.dataset.name}</span>
+<span>x${quantity}</span>
+</li>
+`;
+
+                    }
+
+                });
+
+                document.getElementById("cartList").innerHTML = html;
+
+                document.getElementById("totalPrice").innerText =
+                    "Rp " + total.toLocaleString("id-ID");
+
+            }
+
+
+            /* CHECKBOX */
+
+            document.querySelectorAll(".product-check").forEach(check => {
+
+                check.addEventListener("change", function() {
+
+                    let card = this.closest(".product-card");
+
+                    let qty = card.querySelector(".quantity-input");
+                    let box = card.querySelector(".qty-box");
+
+                    qty.disabled = !this.checked;
+
+                    box.style.display = this.checked ? "flex" : "none";
+
+                    updateCart();
+
+                });
+
+            });
+
+
+            /* PLUS */
+
+            document.querySelectorAll(".plus").forEach(btn => {
+
+                btn.addEventListener("click", function() {
+
+                    let input = this.parentElement.querySelector(".quantity-input");
+
+                    if (input.disabled) return;
+
+                    let max = parseInt(input.max);
+
+                    if (parseInt(input.value) < max) {
+
+                        input.value++;
+
+                    }
+
+                    updateCart();
+
+                });
+
+            });
+
+
+            /* MINUS */
+
+            document.querySelectorAll(".minus").forEach(btn => {
+
+                btn.addEventListener("click", function() {
+
+                    let input = this.parentElement.querySelector(".quantity-input");
+
+                    if (input.disabled) return;
+
+                    if (parseInt(input.value) > 1) {
+
+                        input.value--;
+
+                    }
+
+                    updateCart();
+
+                });
+
+            });
+
 
         });
     </script>

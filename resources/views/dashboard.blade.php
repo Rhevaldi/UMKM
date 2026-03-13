@@ -182,6 +182,7 @@
                                     <tr>
                                         <th width="50">No</th>
                                         <th>Produk</th>
+                                        <th>Gambar</th>
                                         <th width="120">Stok</th>
                                     </tr>
                                 </thead>
@@ -195,6 +196,8 @@
 
                                             <td>{{ $product->name }}</td>
 
+                                            <td><img src="{{ asset($product->image) }}" alt="{{ $product->name }}" style="width:30px;height:30px;object-fit:cover;border-radius:6px"></td>
+                                            
                                             <td>
                                                 <span class="badge bg-danger">
                                                     {{ $product->stock }}

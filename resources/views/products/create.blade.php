@@ -61,8 +61,7 @@
                 <div class="form-group">
                     <label>Deskripsi</label>
 
-                    <textarea name="description" class="form-control">
-</textarea>
+                    <textarea name="description" class="form-control"></textarea>
                 </div>
 
 

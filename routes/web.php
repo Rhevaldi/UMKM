@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 | CONTROLLERS
 |--------------------------------------------------------------------------
 */
-use App\Http\Controllers\PenjualanController;
+
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
@@ -17,8 +17,10 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PaymentSettingController;
+
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OrdersExport;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -28,11 +30,15 @@ use App\Exports\OrdersExport;
 
 Route::get('/', [FrontendController::class,'home'])->name('home');
 
-Route::get('/order', [FrontendController::class,'orderPage'])
+/* ORDER PAGE */
+
+Route::get('/order', [OrderController::class,'orderPage'])
     ->name('order.page');
 
 Route::post('/order', [OrderController::class,'storePublic'])
     ->name('order.public');
+
+/* PAYMENT */
 
 Route::get('/payment/{order}', [OrderController::class,'paymentPage'])
     ->name('order.payment');
@@ -62,7 +68,9 @@ Route::middleware(['auth','verified'])->group(function () {
         ->name('dashboard');
 
     /*
+    |--------------------------------------------------------------------------
     | PROFILE
+    |--------------------------------------------------------------------------
     */
 
     Route::get('/profile',[ProfileController::class,'edit'])
@@ -76,7 +84,9 @@ Route::middleware(['auth','verified'])->group(function () {
 
 
     /*
+    |--------------------------------------------------------------------------
     | MASTER DATA
+    |--------------------------------------------------------------------------
     */
 
     Route::resource('categories',CategoryController::class);
@@ -84,27 +94,33 @@ Route::middleware(['auth','verified'])->group(function () {
 
 
     /*
+    |--------------------------------------------------------------------------
     | ORDERS
+    |--------------------------------------------------------------------------
     */
 
- Route::resource('orders', OrderController::class);
+    Route::resource('orders', OrderController::class);
 
-Route::get(
-    'orders/{order}/whatsapp',
-    [OrderController::class,'whatsapp']
-)->name('orders.whatsapp');
+    Route::get(
+        'orders/{order}/whatsapp',
+        [OrderController::class,'whatsapp']
+    )->name('orders.whatsapp');
 
-Route::get(
-    'orders/{order}/invoice',
-    [OrderController::class,'invoice']
-)->name('orders.invoice');
+    Route::get(
+        'orders/{order}/invoice',
+        [OrderController::class,'invoice']
+    )->name('orders.invoice');
     
-Route::post('/orders/{order}/verify',
-    [OrderController::class,'verify'])
-    ->name('orders.verify');
+    Route::post(
+        '/orders/{order}/verify',
+        [OrderController::class,'verify']
+    )->name('orders.verify');
+
 
     /*
+    |--------------------------------------------------------------------------
     | PAYMENT
+    |--------------------------------------------------------------------------
     */
 
     Route::get(
@@ -117,17 +133,27 @@ Route::post('/orders/{order}/verify',
         [PaymentController::class,'store']
     )->name('payments.store');
 
-Route::get('/payment-settings',[PaymentSettingController::class,'index'])
-->name('payment.settings.index');
-
-Route::get('/payment-settings/edit',[PaymentSettingController::class,'edit'])
-->name('payment.settings.edit');
-
-Route::post('/payment-settings/update',[PaymentSettingController::class,'update'])
-->name('payment.settings.update');
 
     /*
+    |--------------------------------------------------------------------------
+    | PAYMENT SETTINGS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/payment-settings',[PaymentSettingController::class,'index'])
+        ->name('payment.settings.index');
+
+    Route::get('/payment-settings/edit',[PaymentSettingController::class,'edit'])
+        ->name('payment.settings.edit');
+
+    Route::post('/payment-settings/update',[PaymentSettingController::class,'update'])
+        ->name('payment.settings.update');
+
+
+    /*
+    |--------------------------------------------------------------------------
     | REPORTS
+    |--------------------------------------------------------------------------
     */
 
     Route::get('/reports',[ReportController::class,'index'])
@@ -141,6 +167,5 @@ Route::post('/payment-settings/update',[PaymentSettingController::class,'update'
         );
 
     })->name('reports.export');
-    
 
 });

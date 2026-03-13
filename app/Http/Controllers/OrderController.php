@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Category;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\PaymentSetting;
@@ -43,8 +44,25 @@ public function destroy(Order $order)
 
 
 /* ===============================
+   PUBLIC ORDER PAGE
+================================ */
+
+public function orderPage()
+{
+    $products = Product::with('category')
+        ->where('stock','>',0)
+        ->get();
+
+    $categories = Category::latest()->get();
+
+    return view('frontend.pages.order', compact('products','categories'));
+}
+
+/* ===============================
    CUSTOMER ORDER
 ================================ */
+
+
 
 public function storePublic(Request $request)
 {
