@@ -17,13 +17,13 @@
     <link rel="stylesheet" href="{{ asset('template/assets/css/default.css') }}">
     <link rel="stylesheet" href="{{ asset('template/assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('template/assets/css/customuser.css') }}">
-   
+
 </head>
 
 <body>
 
 
-
+    @include('frontend.layouts.navbar')
     @yield('content')
 
 
@@ -63,7 +63,7 @@
 
         });
     </script>
-@yield('scripts')
+    @yield('scripts')
 </body>
 
 </html>

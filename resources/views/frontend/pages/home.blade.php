@@ -17,6 +17,8 @@
 
     
 
+    
+
     <footer class="text-center py-4 bg-dark text-white">
         © {{ date('Y') }} UMKM Digital. All rights reserved.
     </footer>
