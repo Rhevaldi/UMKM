@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="{{ asset('template/assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('template/assets/css/default.css') }}">
     <link rel="stylesheet" href="{{ asset('template/assets/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('template/assets/css/customuser.css') }}">
+    <link rel="stylesheet" href="{{ asset('template/assets/css/style-custom-user.css') }}">
 
 </head>
 

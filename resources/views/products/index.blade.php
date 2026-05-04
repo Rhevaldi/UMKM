@@ -6,15 +6,14 @@
 
     <div class="card shadow-sm">
 
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center mb-3">
 
-            <h5 class="mb-0">
-                <i class="fas fa-box mr-2"></i>
-                Daftar Produk
-            </h5>
+            <h4 class="mb-0">
+                <i class="fas fa-box mr-2"></i> Manajemen Produk
+            </h4>
 
             <a href="{{ route('products.create') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Tambah Produk
+                <i class="fas fa-plus mr-1"></i> Tambah Produk
             </a>
 
         </div>
